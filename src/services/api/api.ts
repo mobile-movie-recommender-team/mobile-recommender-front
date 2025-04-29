@@ -3,7 +3,7 @@ import { Movie, MovieDetail } from './types'
 
 export const movieApi = createApi({
     reducerPath: 'movieApi',
-    baseQuery: fetchBaseQuery({ baseUrl: 'http://192.168.1.5:8080/' }),
+    baseQuery: fetchBaseQuery({ baseUrl: 'http://192.168.0.100:8080/api/v1/' }),
     endpoints: (builder) => ({
         getAllMovies: builder.query<Movie[], void>({
             query: () => 'film/all',

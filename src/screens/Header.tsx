@@ -1,39 +1,67 @@
-import { SafeAreaView, Text, View, TouchableOpacity, Image, Animated } from 'react-native';
-import styles from '../components/styles'
-import { StackNavigationProp } from '@react-navigation/stack';
+import React, { useEffect, useState } from 'react';
+import { SafeAreaView, Text, View, TouchableOpacity } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import styles from '../components/styles';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
-interface HeaderProps {
-    navigation: StackNavigationProp<any, any>;
-  }
-
 const Header = () => {
-    const navigation = useNavigation<HeaderProps>()
-    const route = useRoute()
+  const navigation = useNavigation<any>();
+  const route = useRoute();
+  const [userName, setUserName] = useState<string>('');
 
-    const getHeaderText = () => {
-        switch (route.name) {
-            case 'Detail':
-                return ''
-            default:
-                return 'Movies'
+  useEffect(() => {
+    const fetchUserName = async () => {
+      try {
+        const token = await AsyncStorage.getItem('accessToken');
+        if (token) {
+          const response = await fetch('http://192.168.0.100:8080/api/v1/profile', {
+            method: 'GET',
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          if (response.ok) {
+            const data = await response.json();
+            setUserName(data.name);
+          }
         }
-    }
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
+      }
+    };
 
-    return (
-        <SafeAreaView>
-            <View style={{ flexDirection: 'row' }}>
-                {route.name === 'Detail' && (
-                    <TouchableOpacity style={{ paddingRight: 100, top: 12 }} onPress={() => navigation.navigate('Home')}>
-                        <Image source={require('../static/back.png')} />
-                    </TouchableOpacity>
-                )}
-                <Text style={styles.text}>{getHeaderText()}</Text>
-            </View>
-            <Text style={styles.line}></Text>
-        </SafeAreaView>
+    fetchUserName();
+  }, []);
 
-    )
-}
+  const shouldShowBackArrow = route.name === 'Detail' || route.name === 'UserProfile';
 
-export default Header
+  return (
+    <SafeAreaView>
+      <View style={{
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 16,
+      }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          {shouldShowBackArrow && (
+            <TouchableOpacity onPress={() => navigation.navigate('Home')}>
+              <Text style={{ fontSize: 18, paddingRight: 10, paddingTop: 14 }}>{'<'}</Text>
+            </TouchableOpacity>
+          )}
+          {route.name !== 'Detail' && route.name !== 'UserProfile' && (
+            <Text style={styles.text}>Movies</Text>
+          )}
+        </View>
+        {userName && route.name !== 'Detail' && route.name !== 'UserProfile' && (
+          <TouchableOpacity onPress={() => navigation.navigate('UserProfile')}>
+            <Text style={{ fontSize: 16, paddingTop: 8 }}>{userName}</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+      <Text style={styles.line}></Text>
+    </SafeAreaView>
+  );
+};
+
+export default Header;
