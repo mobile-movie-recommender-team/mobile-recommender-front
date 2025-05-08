@@ -3,7 +3,15 @@ import { StyleSheet } from "react-native";
 const styles = StyleSheet.create({
     main: {
         backgroundColor: '#fff',
-        flex: 1
+        flex: 1,
+    },
+    header:
+    {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 16,
+        marginTop: 12,
     },
     image: {
         width: 100,
@@ -92,7 +100,14 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         borderColor: 'blue',
     },
-
+    backButton: {
+        borderWidth: 1,
+        borderColor: 'black',
+        borderRadius: 8,
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        marginTop: 10,
+    },
 });
 
 export default styles;

@@ -14,7 +14,7 @@ const Header = () => {
       try {
         const token = await AsyncStorage.getItem('accessToken');
         if (token) {
-          const response = await fetch('http://192.168.0.100:8080/api/v1/profile', {
+          const response = await fetch('http://192.168.0.102:8080/api/v1/profile', {
             method: 'GET',
             headers: {
               Authorization: `Bearer ${token}`,
@@ -37,27 +37,32 @@ const Header = () => {
 
   return (
     <SafeAreaView>
-      <View style={{
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: 16,
-      }}>
+      <View style={styles.header}>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           {shouldShowBackArrow && (
-            <TouchableOpacity onPress={() => navigation.navigate('Home')}>
-              <Text style={{ fontSize: 18, paddingRight: 10, paddingTop: 14 }}>{'<'}</Text>
+            <TouchableOpacity 
+              onPress={() => navigation.navigate('Home')}
+              style={styles.backButton}
+            >
+              <Text style={{ fontSize: 18 }}>{'<'}</Text>
             </TouchableOpacity>
           )}
           {route.name !== 'Detail' && route.name !== 'UserProfile' && (
             <Text style={styles.text}>Movies</Text>
           )}
         </View>
-        {userName && route.name !== 'Detail' && route.name !== 'UserProfile' && (
-          <TouchableOpacity onPress={() => navigation.navigate('UserProfile')}>
-            <Text style={{ fontSize: 16, paddingTop: 8 }}>{userName}</Text>
-          </TouchableOpacity>
-        )}
+        {route.name !== 'Recommendations' && route.name !== 'Detail' && (
+            <TouchableOpacity onPress={() => navigation.navigate('Recommendations')} style={{ marginLeft: 10 }}>
+              <Text style={{ fontSize: 20, paddingTop: 8, fontWeight: 'bold'}}>Recommendations</Text>
+            </TouchableOpacity>
+          )}
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          {userName && route.name !== 'Detail' && route.name !== 'UserProfile' && (
+            <TouchableOpacity onPress={() => navigation.navigate('UserProfile')}>
+              <Text style={{ fontSize: 14, paddingTop: 8, fontWeight: 'bold' }}>{userName}</Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
       <Text style={styles.line}></Text>
     </SafeAreaView>
