@@ -1,16 +1,31 @@
-import React from 'react';
-import { Image, Text, View, ScrollView } from 'react-native';
-import { useGetOneMovieQuery } from '../services/api/api';
+import React, { useEffect, useState } from 'react';
+import { Image, Text, View, ScrollView, TouchableOpacity } from 'react-native';
+import { useGetOneMovieQuery, useGetSessionsQuery } from '../services/api/api';
 import styles from '../components/styles';
-import { useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 
 const DetailScreen = () => {
+    const navigation = useNavigation<StackNavigationProp<any, any>>()
     const route = useRoute()
     const { movieId } = route.params;
     const { data } = useGetOneMovieQuery(movieId)
     const movie = data?.result
-    console.log(movie?.actors)
-    console.log(movie?.genres)
+
+    const [shouldFetchSessions, setShouldFetchSessions] = useState(false)
+    const { data: sessions } = useGetSessionsQuery(movie?.title, {
+        skip: !shouldFetchSessions,
+    })
+
+    const handleViewSessions = () => {
+        setShouldFetchSessions(true)
+    }
+
+    useEffect(() => {
+        if (sessions) {
+            navigation.navigate('Session', { sessions });
+        }
+    }, [sessions]);
 
     const formateDate = (dateString: string) => {
         const date = new Date(dateString)
@@ -19,9 +34,14 @@ const DetailScreen = () => {
     }
 
     return (
-        <ScrollView>
+        <ScrollView style={{ flex: 1 }}>
             <View style={styles.films_container}>
-                <Image source={{ uri: movie?.posterURL }} style={styles.image} resizeMode='stretch' />
+                <View>
+                    <Image source={{ uri: movie?.posterURL }} style={styles.image} resizeMode='stretch' />
+                    <TouchableOpacity onPress={handleViewSessions} style={styles.sessions_button}>
+                        <Text>View sessions</Text>
+                    </TouchableOpacity>
+                </View>
                 <View style={{ paddingLeft: 20, marginBottom: 10 }}>
                     <Text style={{ fontSize: 18, fontWeight: 'bold', paddingBottom: 10 }}>{movie?.title}</Text>
                     <Text style={[styles.name_info, { marginBottom: 1 }]}>Description: </Text>
@@ -55,7 +75,7 @@ const DetailScreen = () => {
                     <View style={{ flexDirection: 'row' }}>
                         <Text style={styles.name_info}>Genre: </Text>
                         <View>
-                            {movie?.genres.map((genre, index) => (
+                            {movie?.genres.map((genre: any, index: number) => (
                                 <Text key={index} style={[styles.film_info, { marginBottom: 1 }]}>
                                     {genre?.name}
                                 </Text>
@@ -64,8 +84,8 @@ const DetailScreen = () => {
                     </View>
                     <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
                         <Text style={styles.name_info}>Actors: </Text>
-                        <Text style={[styles.film_info, { width: 200 }]}>
-                            {movie?.actors?.slice(0, 20).map(actor => actor.fullName).join(', ')}
+                        <Text style={[styles.film_info, { width: 210 }]}>
+                            {movie?.actors?.slice(0, 20).map((actor: { fullName: any }) => actor.fullName).join(', ')}
                         </Text>
                     </View>
                 </View>

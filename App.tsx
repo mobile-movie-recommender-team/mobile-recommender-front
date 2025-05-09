@@ -11,6 +11,7 @@ import Header from './src/screens/Header';
 import AuthScreen from './src/screens/AuthScreen';
 import UserProfileScreen from './src/screens/ProfileScreen';
 import RecommendationsScreen from './src/screens/RecommendationsScreen';
+import SessionScreen from './src/screens/SessionScreen';
 
 const Stack = createStackNavigator();
 
@@ -57,6 +58,11 @@ function App(): React.JSX.Element {
           <Stack.Screen
             name="UserProfile"
             component={UserProfileScreen}
+            options={{ headerShown: true, header: () => <Header /> }}
+          />
+          <Stack.Screen
+            name="Session"
+            component={SessionScreen}
             options={{ headerShown: true, header: () => <Header /> }}
           />
           <Stack.Screen

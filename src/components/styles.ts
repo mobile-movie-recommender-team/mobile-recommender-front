@@ -108,6 +108,24 @@ const styles = StyleSheet.create({
         paddingVertical: 5,
         marginTop: 10,
     },
+     sessions_button: {
+        backgroundColor: '#d9c334',
+        marginTop: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: 30,
+        borderRadius: 10
+    },
+    session_container: {
+        backgroundColor: '#dbdbdb',
+        marginBottom: 20,
+        borderWidth: 1,
+        borderRadius: 10
+    },
+    session_keys: {
+        color: 'gray', 
+        paddingLeft: 5,
+    }
 });
 
 export default styles;

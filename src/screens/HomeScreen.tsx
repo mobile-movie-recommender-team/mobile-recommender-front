@@ -1,15 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { FlatList, Image, TextInput, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, Image, TextInput, Text, TouchableOpacity, View, StatusBar } from 'react-native';
 import { useGetAllMoviesQuery } from '../services/api/api';
 import styles from '../components/styles';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import MultiSelect from 'react-native-multiple-select';
-
-interface BottomNavProps {
-  navigation: StackNavigationProp<any, any>;
-}
 
 const HomeScreen = () => {
   const [title, setTitle] = useState('')
@@ -24,7 +20,7 @@ const HomeScreen = () => {
   const { data } = useGetAllMoviesQuery()
   const movies = data?.result
 
-  const navigation = useNavigation<BottomNavProps>()
+  const navigation = useNavigation<StackNavigationProp<any, any>>()
 
   const itemsPerPage = 10;
   const [currentPage, setCurrentPage] = useState(1);
@@ -50,7 +46,7 @@ const HomeScreen = () => {
     if (title.trim() === '') {
       setSearchedMovies([])
     } else {
-      const filteredMovies = movies.filter((movie) =>
+      const filteredMovies = movies.filter((movie: any) =>
         movie.title.toLowerCase().includes(title.toLowerCase())
       )
       setSearchedMovies(filteredMovies)
@@ -78,11 +74,11 @@ const HomeScreen = () => {
     { id: '3', name: 'UK' },
   ];
 
-  const onSelectedGenresChange = (selectedGenres) => {
+  const onSelectedGenresChange = (selectedGenres: any) => {
     setSelectedGenres(selectedGenres);
   };
 
-  const onSelectedCountriesChange = (selectedCountries) => {
+  const onSelectedCountriesChange = (selectedCountries: any) => {
     setSelectedCountries(selectedCountries);
   };
 
@@ -177,8 +173,8 @@ const HomeScreen = () => {
       )}
         keyExtractor={(item) => item.id.toString()}
         ListFooterComponent={
-          !isSearching && totalPages > 1 && (
-            <View style={styles.paginationContainer}>
+          !isSearching && totalPages > 1 ? (
+            <View style={[styles.paginationContainer, {paddingBottom: StatusBar.currentHeight}]}>
               {Array.from({ length: totalPages }).map((_, index) => {
                 const page = index + 1;
                 return (
@@ -188,7 +184,7 @@ const HomeScreen = () => {
                 );
               })}
             </View>
-          )
+          ) : null
         }
       />
 
