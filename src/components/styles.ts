@@ -91,7 +91,8 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         top: 5,
-        borderWidth: 1,
+        borderBottomWidth: 1,
+        backgroundColor: '#f2f2f2'
     },
     input_filter: {
         borderWidth: 1,
@@ -99,6 +100,7 @@ const styles = StyleSheet.create({
         height: 40,
         borderRadius: 5,
         borderColor: 'blue',
+        marginBottom: 10
     },
     backButton: {
         borderWidth: 1,
@@ -125,6 +127,20 @@ const styles = StyleSheet.create({
     session_keys: {
         color: 'gray', 
         paddingLeft: 5,
+    },
+    filter_buttons: {
+        borderRadius: 5,
+        width: 60,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 5,
+        marginTop: 5,
+        height: 30
+    },
+    date_buttons: {
+        borderWidth: 0.2,
+        padding: 5,
+        backgroundColor: '#f0f0f0',
     }
 });
 

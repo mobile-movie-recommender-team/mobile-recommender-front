@@ -14,7 +14,7 @@ const Header = () => {
       try {
         const token = await AsyncStorage.getItem('accessToken');
         if (token) {
-          const response = await fetch('http://192.168.1.5:8080/api/v1/profile', {
+          const response = await fetch('http://192.168.1.2:8080/api/v1/profile', {
             method: 'GET',
             headers: {
               Authorization: `Bearer ${token}`,

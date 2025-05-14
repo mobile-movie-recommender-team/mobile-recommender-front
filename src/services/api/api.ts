@@ -4,10 +4,21 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 
 export const movieApi = createApi({
     reducerPath: 'movieApi',
-    baseQuery: fetchBaseQuery({ baseUrl: 'http://192.168.1.5:8080/api/v1/' }),
+    baseQuery: fetchBaseQuery({ baseUrl: 'http://192.168.1.2:8080/api/v1/' }),
     endpoints: (builder) => ({
-        getAllMovies: builder.query<Movie[], void>({
-            query: () => 'film/all',
+        getAllMovies: builder.query({
+            query: (filters) => {
+                const params = new URLSearchParams()
+                if (filters.ratingFrom) params.append('FromRating', filters.ratingFrom);
+                if (filters.ratingTo) params.append('ToRating', filters.ratingTo);
+                if (filters.dateFrom) params.append('FromReleaseDate', filters.dateFrom);
+                if (filters.dateTo) params.append('ToReleaseDate', filters.dateTo);
+                if (filters.genres?.length) {
+                    filters.genres.forEach(genre => params.append('Genres', genre));
+                }
+
+                return `film/all?${params.toString()}`
+            }
         }),
         getOneMovie: builder.query<MovieDetail, number>({
             query: (id) => `film/${id}`,

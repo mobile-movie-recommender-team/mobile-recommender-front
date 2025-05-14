@@ -60,7 +60,7 @@ const DetailScreen = () => {
                     </View>
                     <View style={{ flexDirection: 'row' }}>
                         <Text style={styles.name_info}>Duration: </Text>
-                        <Text style={styles.film_info}>{movie?.duration} min.</Text>
+                        <Text style={styles.film_info}>{movie?.duration}</Text>
                     </View>
                     {movie?.ageRating && (
                         <View style={{ flexDirection: 'row' }}>

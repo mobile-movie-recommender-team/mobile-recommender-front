@@ -1,7 +1,7 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_URL = 'http://192.168.1.5:8080/api/v1/profile';
+const API_URL = 'http://192.168.1.2:8080/api/v1/profile';
 
 interface UserProfile {
   name: string;

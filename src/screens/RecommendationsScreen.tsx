@@ -46,7 +46,7 @@ export default function RecommendationsScreen() {
       }
 
       const response = await fetch(
-        `http://192.168.1.5:8080/api/v1/recommendations?pageSize=${PAGE_SIZE}&pageNumber=${page}`,
+        `http://192.168.1.2:8080/api/v1/recommendations?pageSize=${PAGE_SIZE}&pageNumber=${page}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
