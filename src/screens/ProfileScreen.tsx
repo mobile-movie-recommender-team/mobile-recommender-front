@@ -2,12 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { View, SafeAreaView, Text, TextInput, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import { getCurrentLocation, requestLocationPermission } from '../services/locationService';
 import { fetchUserProfile, updateUserProfile } from '../services/profileService';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
 
 export default function UserProfileScreen() {
   const [name, setName] = useState<string>('Username');
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
   const [newName, setNewName] = useState<string>('');
+  const navigation = useNavigation();
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -40,16 +43,28 @@ export default function UserProfileScreen() {
   const handleLocationUpdate = async () => {
     try {
       const hasPermission = await requestLocationPermission();
-        if (!hasPermission) {
-            Alert.alert('Permission Denied', 'App needs location permission to register');
-            return;
-        }
+      if (!hasPermission) {
+        Alert.alert('Permission Denied', 'App needs location permission to register');
+        return;
+      }
       const location = await getCurrentLocation();
       setLatitude(location.latitude);
       setLongitude(location.longitude);
       await updateUserProfile({ name, latitude: location.latitude, longitude: location.longitude });
     } catch (err) {
       console.error('Geolocation error:', err);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.removeItem('accessToken');
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Auth' }],
+      });
+    } catch (err) {
+      console.error('Logout error:', err);
     }
   };
 
@@ -76,6 +91,10 @@ export default function UserProfileScreen() {
 
       <TouchableOpacity style={[styles.button, { marginTop: 10 }]} onPress={handleLocationUpdate}>
         <Text style={styles.buttonText}>Update Geolocation</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={[styles.button, { backgroundColor: '#FF6347', marginTop: 30 }]} onPress={handleLogout}>
+        <Text style={styles.buttonText}>Logout</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );

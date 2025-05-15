@@ -14,11 +14,18 @@ const styles = StyleSheet.create({
         marginTop: 12,
     },
     image: {
-        width: 100,
-        height: 150,
+        width: 150,
+        height: 200,
     },
     films_container: {
         flexDirection: 'row',
+        paddingTop: 15,
+        paddingRight: 15,
+        paddingBottom: 15,
+        paddingLeft: 10,
+    },
+    films_info_container: {
+        flexDirection: 'column',
         paddingTop: 15,
         paddingRight: 15,
         paddingBottom: 15,

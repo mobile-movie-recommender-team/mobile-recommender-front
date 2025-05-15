@@ -8,110 +8,110 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import MultiSelect from 'react-native-multiple-select';
 
 const HomeScreen = () => {
-  const [title, setTitle] = useState('')
-  const [searchedMovies, setSearchedMovies] = useState([])
-  const [isFilter, setIsFilter] = useState(false)
+  const [title, setTitle] = useState('');
+  const [searchedMovies, setSearchedMovies] = useState([]);
+  const [isFilter, setIsFilter] = useState(false);
   const [dateFrom, setDateFrom] = useState(new Date());
-  const [showDateFrom, setShowDateFrom] = useState(false)
+  const [showDateFrom, setShowDateFrom] = useState(false);
   const [dateTo, setDateTo] = useState(new Date());
-  const [selectedGenres, setSelectedGenres] = useState([])
-  const [showDateTo, setShowDateTo] = useState(false)
-  const [selectedDateFrom, setSelectedDateFrom] = useState<string | null>(null)
-  const [selectedDateTo, setSelectedDateTo] = useState<string | null>(null)
-  const [ratingFrom, setRatingFrom] = useState('')
-  const [ratingTo, setRatingTo] = useState('')
-  const [filters, setFilters] = useState<any>({})
+  const [selectedGenres, setSelectedGenres] = useState([]);
+  const [showDateTo, setShowDateTo] = useState(false);
+  const [selectedDateFrom, setSelectedDateFrom] = useState<string | null>(null);
+  const [selectedDateTo, setSelectedDateTo] = useState<string | null>(null);
+  const [ratingFrom, setRatingFrom] = useState('');
+  const [ratingTo, setRatingTo] = useState('');
+  const [filters, setFilters] = useState<any>({});
 
-  const { data } = useGetAllMoviesQuery(filters)
-  const movies = data?.result
+  const { data } = useGetAllMoviesQuery(filters);
+  const movies = data?.result;
 
-  const navigation = useNavigation<StackNavigationProp<any, any>>()
+  const navigation = useNavigation<StackNavigationProp<any, any>>();
 
   const itemsPerPage = 10;
   const [currentPage, setCurrentPage] = useState(1);
-  const listRef = useRef<FlatList>(null)
+  const listRef = useRef<FlatList>(null);
 
   const currentData = movies?.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
   const totalPages = Math.ceil(movies?.length / itemsPerPage);
 
   const goToPage = (page: number) => {
     setCurrentPage(page);
-    listRef.current?.scrollToOffset({ animated: true, offset: 0 })
+    listRef.current?.scrollToOffset({ animated: true, offset: 0 });
   };
 
   const formateDate = (releaseDate: any) => {
     return new Date(releaseDate).getFullYear();
-  }
+  };
 
   const handleChangeTextInput = (text: string) => {
-    setTitle(text)
-  }
+    setTitle(text);
+  };
 
   useEffect(() => {
     if (title.trim() === '') {
-      setSearchedMovies([])
+      setSearchedMovies([]);
     } else {
       const filteredMovies = movies.filter((movie: any) =>
         movie.title.toLowerCase().includes(title.toLowerCase())
-      )
-      setSearchedMovies(filteredMovies)
+      );
+      setSearchedMovies(filteredMovies);
     }
-  }, [title])
+  }, [title]);
 
-  const displayedMovies = title.trim() ? searchedMovies : currentData
-  const isSearching = title.trim().length > 0
+  const displayedMovies = title.trim() ? searchedMovies : currentData;
+  const isSearching = title.trim().length > 0;
 
   const handleFilter = () => {
-    setIsFilter(!isFilter)
-  }
+    setIsFilter(!isFilter);
+  };
 
   const genres = [
     { id: '1', name: 'Action' },
     { id: '2', name: 'Comedy' },
     { id: '3', name: 'Drama' },
     { id: '4', name: 'Thriller' },
-    { id: '5', name: 'Horror' }
+    { id: '5', name: 'Horror' },
   ];
 
   const onDateFromChange = (event: any, selectedDate: Date | undefined) => {
     setShowDateFrom(false);
     if (selectedDate) {
-      setDateFrom(selectedDate)
-      setSelectedDateFrom(selectedDate.toISOString().split('T')[0])
+      setDateFrom(selectedDate);
+      setSelectedDateFrom(selectedDate.toISOString().split('T')[0]);
     }
-  }
+  };
 
   const onDateToChange = (event: any, selectedDate: Date | undefined) => {
     setShowDateTo(false);
     if (selectedDate) {
       setDateTo(selectedDate);
-      setSelectedDateTo(selectedDate.toISOString().split('T')[0])
+      setSelectedDateTo(selectedDate.toISOString().split('T')[0]);
     }
-  }
+  };
 
   const onSelectedGenresChange = (selectedGenres: any) => {
     setSelectedGenres(selectedGenres);
   };
 
   const handleSubmit = () => {
-    const newFilters: any = {}
-    if (ratingFrom) newFilters.ratingFrom = parseFloat(ratingFrom)
-    if (ratingTo) newFilters.ratingTo = parseFloat(ratingTo)
+    const newFilters: any = {};
+    if (ratingFrom) newFilters.ratingFrom = parseFloat(ratingFrom);
+    if (ratingTo) newFilters.ratingTo = parseFloat(ratingTo);
 
-    const currentDate = new Date()
-    currentDate.setHours(0, 0, 0, 0)
-    const dateFromWithoutTime = new Date(dateFrom)
-    dateFromWithoutTime.setHours(0, 0, 0, 0)
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
+    const dateFromWithoutTime = new Date(dateFrom);
+    dateFromWithoutTime.setHours(0, 0, 0, 0);
 
-    const dateToWithoutTime = new Date(dateTo)
-    dateToWithoutTime.setHours(0, 0, 0, 0)
+    const dateToWithoutTime = new Date(dateTo);
+    dateToWithoutTime.setHours(0, 0, 0, 0);
 
     if (dateFromWithoutTime.getTime() !== currentDate.getTime()) {
-      newFilters.dateFrom = dateFrom.toISOString().split('T')[0]
+      newFilters.dateFrom = dateFrom.toISOString().split('T')[0];
     }
 
     if (dateToWithoutTime.getTime() !== currentDate.getTime()) {
-      newFilters.dateTo = dateTo.toISOString().split('T')[0]
+      newFilters.dateTo = dateTo.toISOString().split('T')[0];
     }
 
     if (selectedGenres.length) {
@@ -123,20 +123,20 @@ const HomeScreen = () => {
 
     setFilters(newFilters);
     setIsFilter(false);
-  }
+  };
 
   const handleClearFilters = () => {
-    setIsFilter(false)
-    setTitle('')
-    setRatingFrom('')
-    setRatingTo('')
-    setDateFrom(new Date())
-    setDateTo(new Date())
-    setSelectedDateFrom(null)
-    setSelectedDateTo(null)
-    setSelectedGenres([])
-    setFilters({})
-  }
+    setIsFilter(false);
+    setTitle('');
+    setRatingFrom('');
+    setRatingTo('');
+    setDateFrom(new Date());
+    setDateTo(new Date());
+    setSelectedDateFrom(null);
+    setSelectedDateTo(null);
+    setSelectedGenres([]);
+    setFilters({});
+  };
 
 
   return (
@@ -234,7 +234,7 @@ const HomeScreen = () => {
       />
 
     </View>
-  )
-}
+  );
+};
 
 export default HomeScreen;

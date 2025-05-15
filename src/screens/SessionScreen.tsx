@@ -9,8 +9,8 @@ export type RootStackParamList = {
 type SessionRouteProp = RouteProp<RootStackParamList, 'Session'>
 
 const SessionScreen = () => {
-    const route = useRoute<SessionRouteProp>()
-    const sessions = route.params?.sessions
+    const route = useRoute<SessionRouteProp>();
+    const sessions = route.params?.sessions;
 
     return (
         <View style={{ left: 10 }}>
