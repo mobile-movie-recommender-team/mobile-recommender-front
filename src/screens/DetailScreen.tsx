@@ -2,12 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Image, Text, View, ScrollView, TouchableOpacity } from 'react-native';
 import { useGetOneMovieQuery, useGetSessionsQuery } from '../services/api/api';
 import styles from '../components/styles';
-import { useRoute } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-        
+
 const DetailScreen = () => {
     const navigation = useNavigation<StackNavigationProp<any, any>>();
     const route = useRoute();
@@ -16,14 +15,14 @@ const DetailScreen = () => {
     const { data } = useGetOneMovieQuery(movieId);
     const movie = data?.result;
 
-    const [shouldFetchSessions, setShouldFetchSessions] = useState(false)
+    const [shouldFetchSessions, setShouldFetchSessions] = useState(false);
     const { data: sessions } = useGetSessionsQuery(movie?.title, {
         skip: !shouldFetchSessions,
-    })
+    });
 
     const handleViewSessions = () => {
-        setShouldFetchSessions(true)
-    }
+        setShouldFetchSessions(true);
+    };
 
     useEffect(() => {
         if (sessions) {
