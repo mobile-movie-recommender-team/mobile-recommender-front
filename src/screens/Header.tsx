@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { SafeAreaView, Text, View, TouchableOpacity } from 'react-native';
+import { SafeAreaView, Text, View, TouchableOpacity, StatusBar } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from '../components/styles';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -7,16 +7,17 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 const Header = () => {
   const navigation = useNavigation<any>();
   const route = useRoute();
-
-  const shouldShowBackArrow = route.name === 'Detail' || route.name === 'UserProfile';
+  
+  const shouldShowBackArrow = route.name === 'Detail' || route.name === 'UserProfile' || route.name === 'Session';
 
   return (
     <SafeAreaView>
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: StatusBar.currentHeight }]}>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           {shouldShowBackArrow && (
             <TouchableOpacity 
               onPress={() => navigation.navigate('MainTab')}
+
               style={styles.backButton}
             >
               <Text style={{ fontSize: 18 }}>{'<'}</Text>

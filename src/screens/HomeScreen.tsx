@@ -1,15 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { FlatList, Image, TextInput, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, Image, TextInput, Text, TouchableOpacity, View, StatusBar } from 'react-native';
 import { useGetAllMoviesQuery } from '../services/api/api';
 import styles from '../components/styles';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import MultiSelect from 'react-native-multiple-select';
-
-interface BottomNavProps {
-  navigation: StackNavigationProp<any, any>;
-}
 
 const HomeScreen = () => {
   const [title, setTitle] = useState('')
@@ -19,12 +15,17 @@ const HomeScreen = () => {
   const [showDateFrom, setShowDateFrom] = useState(false)
   const [dateTo, setDateTo] = useState(new Date());
   const [selectedGenres, setSelectedGenres] = useState([])
-  const [selectedCountries, setSelectedCountries] = useState([])
   const [showDateTo, setShowDateTo] = useState(false)
-  const { data } = useGetAllMoviesQuery()
+  const [selectedDateFrom, setSelectedDateFrom] = useState<string | null>(null)
+  const [selectedDateTo, setSelectedDateTo] = useState<string | null>(null)
+  const [ratingFrom, setRatingFrom] = useState('')
+  const [ratingTo, setRatingTo] = useState('')
+  const [filters, setFilters] = useState<any>({})
+
+  const { data } = useGetAllMoviesQuery(filters)
   const movies = data?.result
 
-  const navigation = useNavigation<BottomNavProps>()
+  const navigation = useNavigation<StackNavigationProp<any, any>>()
 
   const itemsPerPage = 10;
   const [currentPage, setCurrentPage] = useState(1);
@@ -50,7 +51,7 @@ const HomeScreen = () => {
     if (title.trim() === '') {
       setSearchedMovies([])
     } else {
-      const filteredMovies = movies.filter((movie) =>
+      const filteredMovies = movies.filter((movie: any) =>
         movie.title.toLowerCase().includes(title.toLowerCase())
       )
       setSearchedMovies(filteredMovies)
@@ -72,19 +73,71 @@ const HomeScreen = () => {
     { id: '5', name: 'Horror' }
   ];
 
-  const countries = [
-    { id: '1', name: 'USA' },
-    { id: '2', name: 'France' },
-    { id: '3', name: 'UK' },
-  ];
+  const onDateFromChange = (event: any, selectedDate: Date | undefined) => {
+    setShowDateFrom(false);
+    if (selectedDate) {
+      setDateFrom(selectedDate)
+      setSelectedDateFrom(selectedDate.toISOString().split('T')[0])
+    }
+  }
 
-  const onSelectedGenresChange = (selectedGenres) => {
+  const onDateToChange = (event: any, selectedDate: Date | undefined) => {
+    setShowDateTo(false);
+    if (selectedDate) {
+      setDateTo(selectedDate);
+      setSelectedDateTo(selectedDate.toISOString().split('T')[0])
+    }
+  }
+
+  const onSelectedGenresChange = (selectedGenres: any) => {
     setSelectedGenres(selectedGenres);
   };
 
-  const onSelectedCountriesChange = (selectedCountries) => {
-    setSelectedCountries(selectedCountries);
-  };
+  const handleSubmit = () => {
+    const newFilters: any = {}
+    if (ratingFrom) newFilters.ratingFrom = parseFloat(ratingFrom)
+    if (ratingTo) newFilters.ratingTo = parseFloat(ratingTo)
+
+    const currentDate = new Date()
+    currentDate.setHours(0, 0, 0, 0)
+    const dateFromWithoutTime = new Date(dateFrom)
+    dateFromWithoutTime.setHours(0, 0, 0, 0)
+
+    const dateToWithoutTime = new Date(dateTo)
+    dateToWithoutTime.setHours(0, 0, 0, 0)
+
+    if (dateFromWithoutTime.getTime() !== currentDate.getTime()) {
+      newFilters.dateFrom = dateFrom.toISOString().split('T')[0]
+    }
+
+    if (dateToWithoutTime.getTime() !== currentDate.getTime()) {
+      newFilters.dateTo = dateTo.toISOString().split('T')[0]
+    }
+
+    if (selectedGenres.length) {
+      newFilters.genres = selectedGenres.map(id => {
+        const genre = genres.find(g => g.id === id);
+        return genre?.name;
+      }).filter(Boolean);
+    }
+
+    setFilters(newFilters);
+    setIsFilter(false);
+  }
+
+  const handleClearFilters = () => {
+    setIsFilter(false)
+    setTitle('')
+    setRatingFrom('')
+    setRatingTo('')
+    setDateFrom(new Date())
+    setDateTo(new Date())
+    setSelectedDateFrom(null)
+    setSelectedDateTo(null)
+    setSelectedGenres([])
+    setFilters({})
+  }
+
 
   return (
     <View style={styles.main}>
@@ -99,25 +152,25 @@ const HomeScreen = () => {
           <View style={styles.filter_list}>
             <Text>Rating</Text>
             <View style={{ paddingTop: 5, flexDirection: 'row' }}>
-              <TextInput style={[styles.input_filter, { marginRight: 10 }]} placeholder='From' />
-              <TextInput style={styles.input_filter} placeholder='To' />
+              <TextInput keyboardType='numeric' value={ratingFrom} onChangeText={setRatingFrom} style={[styles.input_filter, { marginRight: 10 }]} placeholder='From' />
+              <TextInput keyboardType='numeric' value={ratingTo} onChangeText={setRatingTo} style={styles.input_filter} placeholder='To' />
             </View>
             <Text>Release Date</Text>
             <View style={{ paddingTop: 5, flexDirection: 'row' }}>
-              <TouchableOpacity style={{ marginRight: 20 }} onPress={() => setShowDateFrom(true)}>
-                <Text>From Date</Text>
+              <TouchableOpacity style={[styles.date_buttons, { marginRight: 20 }]} onPress={() => setShowDateFrom(true)}>
+                <Text>{selectedDateFrom || "From Date"}</Text>
               </TouchableOpacity>
               {showDateFrom && (
-                <DateTimePicker value={dateFrom} mode="date" display="default" />
+                <DateTimePicker value={dateFrom} mode='date' display='default' onChange={onDateFromChange} />
               )}
-              <TouchableOpacity onPress={() => setShowDateTo(true)}>
-                <Text>To Date</Text>
+              <TouchableOpacity style={styles.date_buttons} onPress={() => setShowDateTo(true)}>
+                <Text>{selectedDateTo || "To Date"}</Text>
               </TouchableOpacity>
               {showDateTo && (
-                <DateTimePicker value={dateTo} mode="date" display="default" />
+                <DateTimePicker value={dateTo} mode='date' display='default' onChange={onDateToChange} />
               )}
             </View>
-            <View style={{ width: 200 }}>
+            <View style={{ width: 200, marginTop: 10 }}>
               <MultiSelect
                 items={genres}
                 uniqueKey="id"
@@ -134,26 +187,14 @@ const HomeScreen = () => {
                 hideSubmitButton={true}
               />
             </View>
-            <View style={{ width: 200 }}>
-              <MultiSelect
-                items={countries}
-                uniqueKey="id"
-                displayKey="name"
-                onSelectedItemsChange={onSelectedCountriesChange}
-                selectedItems={selectedCountries}
-                selectText="Pick countries"
-                tagTextColor="black"
-                selectedItemTextColor="blue"
-                selectedItemIconColor="#fff"
-                itemTextColor="#000"
-                hideTags={true}
-                hideDropdown={true}
-                hideSubmitButton={true}
-              />
+            <View style={{ flexDirection: 'row' }}>
+              <TouchableOpacity style={[styles.filter_buttons, {backgroundColor: 'cyan'}]} onPress={handleClearFilters}>
+                <Text>Clear</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.filter_buttons, {backgroundColor: 'green', marginLeft: 20}]} onPress={handleSubmit}>
+                <Text>Submit</Text>
+              </TouchableOpacity>
             </View>
-            <TouchableOpacity>
-              <Text>Submit</Text>
-            </TouchableOpacity>
           </View>
         </View>
       )}
@@ -177,8 +218,8 @@ const HomeScreen = () => {
       )}
         keyExtractor={(item) => item.id.toString()}
         ListFooterComponent={
-          !isSearching && totalPages > 1 && (
-            <View style={styles.paginationContainer}>
+          !isSearching && totalPages > 1 ? (
+            <View style={[styles.paginationContainer, { paddingBottom: StatusBar.currentHeight }]}>
               {Array.from({ length: totalPages }).map((_, index) => {
                 const page = index + 1;
                 return (
@@ -188,7 +229,7 @@ const HomeScreen = () => {
                 );
               })}
             </View>
-          )
+          ) : null
         }
       />
 

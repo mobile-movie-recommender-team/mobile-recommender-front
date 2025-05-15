@@ -1,18 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import { Image, Text, View, ScrollView, TouchableOpacity } from 'react-native';
-import { useGetOneMovieQuery } from '../services/api/api';
+import { useGetOneMovieQuery, useGetSessionsQuery } from '../services/api/api';
 import styles from '../components/styles';
 import { useRoute } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+        
 const DetailScreen = () => {
+    const navigation = useNavigation<StackNavigationProp<any, any>>();
     const route = useRoute();
+    const [isFavorite, setIsFavorite] = useState(false);
     const { movieId } = route.params;
     const { data } = useGetOneMovieQuery(movieId);
     const movie = data?.result;
 
-    const [isFavorite, setIsFavorite] = useState(false);
+    const [shouldFetchSessions, setShouldFetchSessions] = useState(false)
+    const { data: sessions } = useGetSessionsQuery(movie?.title, {
+        skip: !shouldFetchSessions,
+    })
+
+    const handleViewSessions = () => {
+        setShouldFetchSessions(true)
+    }
+
+    useEffect(() => {
+        if (sessions) {
+            navigation.navigate('Session', { sessions });
+        }
+    }, [sessions]);
 
     const formateDate = (dateString: string) => {
         const date = new Date(dateString);
@@ -85,6 +102,9 @@ const DetailScreen = () => {
                                 {isFavorite ? 'Added to Favorites' : 'Add to Favorites'}
                             </Text>
                         </TouchableOpacity>
+                        <TouchableOpacity onPress={handleViewSessions} style={styles.sessions_button}>
+                            <Text>View sessions</Text>
+                        </TouchableOpacity>
                     </View>
 
                     <View style={{ paddingLeft: 20, flex: 1 }}>
@@ -113,12 +133,10 @@ const DetailScreen = () => {
                                 <Text style={styles.film_info}>{movie?.ageRating}</Text>
                             </View>
                         )}
-
                         <View style={{ flexDirection: 'row' }}>
                             <Text style={styles.name_info}>Rating: </Text>
                             <Text style={styles.film_info}>{movie?.rating}</Text>
                         </View>
-
                         <View style={{ flexDirection: 'row' }}>
                             <Text style={styles.name_info}>Genre: </Text>
                             <View>

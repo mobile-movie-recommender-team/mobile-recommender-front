@@ -13,6 +13,7 @@ import AuthScreen from './src/screens/AuthScreen';
 import UserProfileScreen from './src/screens/ProfileScreen';
 import RecommendationsScreen from './src/screens/RecommendationsScreen';
 import FavoritesScreen from './src/screens/FavoritesScreen';
+import SessionScreen from './src/screens/SessionScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -51,6 +52,11 @@ function App(): React.JSX.Element {
             name="Auth"
             component={AuthScreen}
             options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Session"
+            component={SessionScreen}
+            options={{ headerShown: true, header: () => <Header /> }}
           />
           <Stack.Screen
             name="MainTab"
