@@ -32,7 +32,6 @@ export const loginUser = async (data: LoginData) => {
   try
   {
     const response = await axios.post(`${API_BASE_URL}/login`, data);
-    console.log(response.data.result.token);
     const accessToken = response.data.result.token;
     await AsyncStorage.setItem('accessToken', accessToken);
   } catch (error: any)

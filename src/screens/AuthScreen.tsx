@@ -42,7 +42,7 @@ const AuthScreen: React.FC = () => {
     try {
       await loginUser({ username, password });
       Alert.alert('Success', 'Login successful!');
-      navigation.replace('Home');
+      navigation.replace('MainTab');
     } catch (error: any) {
       Alert.alert('Login failed', error.message || 'Unknown error');
     }

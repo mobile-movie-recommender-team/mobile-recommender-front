@@ -21,23 +21,29 @@ type Movie = {
 };
 
 type RootStackParamList = {
-  Recommendations: undefined;
+  Favorites: undefined;
   Detail: { movieId: string };
 };
 
-type NavigationProp = StackNavigationProp<RootStackParamList, 'Recommendations'>;
+type NavigationProp = StackNavigationProp<RootStackParamList, 'Favorites'>;
 
 const PAGE_SIZE = 6;
 
-export default function RecommendationsScreen() {
-  const [movies, setMovies] = useState<Movie[]>([]);
+export default function FavoritesScreen() {
+  const [allMovies, setAllMovies] = useState<Movie[]>([]);
+  const [visibleMovies, setVisibleMovies] = useState<Movie[]>([]);
   const [page, setPage] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(false);
-  const [hasNextPage, setHasNextPage] = useState<boolean>(false);
   const listRef = useRef<FlatList>(null);
   const navigation = useNavigation<NavigationProp>();
 
-  const fetchMovies = async (page: number) => {
+  const paginate = (data: Movie[], page: number) => {
+    const start = (page - 1) * PAGE_SIZE;
+    const end = start + PAGE_SIZE;
+    return data.slice(start, end);
+  };
+
+  const fetchFavoriteMovies = async () => {
     setLoading(true);
     try {
       const token = await AsyncStorage.getItem('accessToken');
@@ -46,39 +52,39 @@ export default function RecommendationsScreen() {
         return;
       }
 
-      const response = await fetch(
-        `http://192.168.0.102:8080/api/v1/recommendations?pageSize=${PAGE_SIZE}&pageNumber=${page}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      const response = await fetch('http://192.168.0.102:8080/api/v1/favorites/list', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
 
       const text = await response.text();
-
       if (text) {
-        const data = JSON.parse(text);
-        setMovies(data);
-        setHasNextPage(data.length === PAGE_SIZE);
+        const data: Movie[] = JSON.parse(text);
+        setAllMovies(data);
+        setVisibleMovies(paginate(data, 1));
       } else {
-        setMovies([]);
-        setHasNextPage(false);
+        setAllMovies([]);
+        setVisibleMovies([]);
       }
     } catch (err) {
-      console.error('Failed to fetch movies:', err);
+      console.error('Failed to fetch favorite movies:', err);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchMovies(page);
-  }, [page]);
+    fetchFavoriteMovies();
+  }, []);
+
+  useEffect(() => {
+    setVisibleMovies(paginate(allMovies, page));
+  }, [page, allMovies]);
 
   const goToPage = (newPage: number) => {
-    if (newPage < 1) return;
+    if (newPage < 1 || newPage > Math.ceil(allMovies.length / PAGE_SIZE)) return;
     setPage(newPage);
     listRef.current?.scrollToOffset({ animated: true, offset: 0 });
   };
@@ -103,36 +109,38 @@ export default function RecommendationsScreen() {
     </TouchableOpacity>
   );
 
-  const renderPagination = () => (
-    <View style={styles.paginationContainer}>
-      {page > 2 && (
-        <TouchableOpacity style={styles.pageButton} onPress={() => goToPage(1)}>
-          <Text style={styles.pageButtonText}>1</Text>
-        </TouchableOpacity>
-      )}
-
-      {page > 2 && <Text style={styles.pageButtonText}>...</Text>}
-
-      {page > 1 && (
-        <TouchableOpacity style={styles.pageButton} onPress={() => goToPage(page - 1)}>
-          <Text style={styles.pageButtonText}>{page - 1}</Text>
-        </TouchableOpacity>
-      )}
-
-      <TouchableOpacity style={[styles.pageButton, styles.activePageButton]} onPress={() => goToPage(page)}>
-        <Text style={styles.activePageButtonText}>{page}</Text>
-      </TouchableOpacity>
-
-      {hasNextPage && (
-        <>
-          <TouchableOpacity style={styles.pageButton} onPress={() => goToPage(page + 1)}>
-            <Text style={styles.pageButtonText}>{page + 1}</Text>
+  const renderPagination = () => {
+    const totalPages = Math.ceil(allMovies.length / PAGE_SIZE);
+    return (
+      <View style={styles.paginationContainer}>
+        {page > 2 && (
+          <TouchableOpacity style={styles.pageButton} onPress={() => goToPage(1)}>
+            <Text style={styles.pageButtonText}>1</Text>
           </TouchableOpacity>
-          <Text style={styles.pageButtonText}>...</Text>
-        </>
-      )}
-    </View>
-  );
+        )}
+        {page > 2 && <Text style={styles.pageButtonText}>...</Text>}
+
+        {page > 1 && (
+          <TouchableOpacity style={styles.pageButton} onPress={() => goToPage(page - 1)}>
+            <Text style={styles.pageButtonText}>{page - 1}</Text>
+          </TouchableOpacity>
+        )}
+
+        <TouchableOpacity style={[styles.pageButton, styles.activePageButton]} onPress={() => goToPage(page)}>
+          <Text style={styles.activePageButtonText}>{page}</Text>
+        </TouchableOpacity>
+
+        {page < totalPages && (
+          <>
+            <TouchableOpacity style={styles.pageButton} onPress={() => goToPage(page + 1)}>
+              <Text style={styles.pageButtonText}>{page + 1}</Text>
+            </TouchableOpacity>
+            {page + 1 < totalPages && <Text style={styles.pageButtonText}>...</Text>}
+          </>
+        )}
+      </View>
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -141,7 +149,7 @@ export default function RecommendationsScreen() {
       ) : (
         <FlatList
           ref={listRef}
-          data={movies}
+          data={visibleMovies}
           keyExtractor={(item) => item.id.toString()}
           renderItem={renderItem}
           contentContainerStyle={{ paddingBottom: 20 }}
